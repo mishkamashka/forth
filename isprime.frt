@@ -6,7 +6,7 @@
     !
 ;
 
-: prime ( value -- result )
+: is_prime ( value -- result 1-prime, 0-not, -1-neither prime nor not )
     dup 2 < if
 	drop drop
 	-1 save
