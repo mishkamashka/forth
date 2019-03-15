@@ -1,7 +1,6 @@
 ( 0 variant )
 : kollaz ( number -- )
     dup 1 <= if
-	drop
 	.
     else
 	repeat
