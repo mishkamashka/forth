@@ -1,5 +1,5 @@
 # Forthress
-
+Cloned from original https://github.com/sayon/forthress, contains inmplemented tasks for the course.
 ## Summary
 
 Forthress is a Forth dialect made for fun and educational purposes.
