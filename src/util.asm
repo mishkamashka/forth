@@ -1,3 +1,17 @@
+global string_length
+global print_newline
+global print_char
+global print_string
+global print_uint
+global print_int
+global parse_int
+global parse_uint
+global string_equals
+global read_char
+global read_word
+global string_copy
+global in_fd
+
 section .text
 
 ; rdi - first symbol of the string
@@ -116,7 +130,7 @@ read_char:
         ret
 
 section .data
-word_buffer times 256 db 0
+in_fd: times 256 db 0
 
 section .text
 
@@ -124,7 +138,7 @@ section .text
 ; rdx - word length
 read_word:
         push r8
-        mov r8, word_buffer
+        mov r8, in_fd
         .skip:
 		call read_char
 		test rax, rax	; check if end
@@ -138,10 +152,10 @@ read_word:
 		cmp rax, 32
 		jg .read	; till space or lower
         .exit:
-		mov rdi, word_buffer
+		mov rdi, in_fd
 		call string_length
 		mov rdx, rax
-		mov rax, word_buffer
+		mov rax, in_fd
 	pop r8
 	ret
 
