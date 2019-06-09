@@ -6,7 +6,7 @@
     	db %1, 0
     	db %3
    
-%define _lw wh_%+ %2	; update last word pointer
+	%define _lw wh_%+ %2	; update last word pointer
     	xt_ %+ %2 :  dq i_ %+ %2 
 	
 	section .text
@@ -20,7 +20,7 @@
 %macro colon 3
 section .data 
 	wh_ %+ %2 : dq _lw
-%define _lw wh_ %+ %2 
+	%define _lw wh_ %+ %2 
     	db 0	; to mark the name start
     	str_ %+ %2:
     	db %1, 0
@@ -47,4 +47,14 @@ section .data
 native %%__cnst_str, %1
 	push qword %2
 	jmp next
+%endmacro
+
+%macro branch 1 
+	dq xt_branch
+	dq %1
+%endmacro
+
+%macro branch0 1 
+	dq xt_branch0
+	dq %1 
 %endmacro

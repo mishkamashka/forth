@@ -1,9 +1,9 @@
-section .bss
-rs:             resq 65536
-u_mem:          resq 65536
-dict: 		resq 65536
-word_buffer:    resb 1024
-state:		resq 1	
+;section .bss
+;rs:             resq 65536
+;u_mem:          resq 65536
+;dict: 		resq 65536
+;word_buffer:    resb 1024
+;state:		resq 1	
 
 section .text
 
@@ -191,7 +191,7 @@ native "branch", branch
     	mov pc, [pc]
     	jmp next
 
-native "branchzero", branchzero
+native "0branch", branch0
     	pop rax
     	test rax, rax
     	jnz .skip

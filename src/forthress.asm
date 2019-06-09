@@ -8,20 +8,22 @@ global _start
 
 section .text
 
-%include "words.inc"
-%include "util.inc"
+%include "kernel.inc"
+%include "util-words.inc"
+%include "interpreter.inc"
+%include "lib.inc"
 
 section .bss
 
 resq 1023		; return stack end
 rstack_start: resq 1	; return stack start
 
-usr_mem: resq 65536	; data for user
+user_mem: resq 65536	; data for user
 
 section .data
 
 last_word: dq _lw	; last word in the dictionary
-dp: dq usr_mem		; user data pointer
+dp: dq user_mem		; user data pointer
 stack_start: dq 0	; stack address
 
 section .text
