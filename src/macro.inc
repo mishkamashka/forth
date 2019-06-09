@@ -42,11 +42,16 @@ section .data
     	add rstack, 8
 %endmacro
 
+;%macro const 2
+;%defstr %%__cnst_str %1
+;native %%__cnst_str, %1
+;	push qword %2
+;	jmp next
+;%endmacro
+
 %macro const 2
-%defstr %%__cnst_str %1
-native %%__cnst_str, %1
-	push qword %2
-	jmp next
+colon %1, %2
+    dq xt_lit,  %2, xt_exit
 %endmacro
 
 %macro branch 1 

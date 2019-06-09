@@ -6,7 +6,7 @@ all: bin/forthress
 	
 bin/forthress: obj/forthress.o
 	mkdir -p bin 
-	$(LINKER) -o bin/forthress -o bin/forthress obj/forthress.o
+	$(LINKER) -o bin/forthress $(LINKERFLAGS) -o bin/forthress obj/forthress.o $(LIBS)
 
 obj/forthress.o: src/forthress.asm src/macro.inc src/kernel.inc src/util-words.inc src/interpreter.inc src/lib.inc
 	mkdir -p obj

@@ -9,8 +9,8 @@ global _start
 section .text
 
 %include "kernel.inc"
-%include "util-words.inc"
 %include "interpreter.inc"
+%include "util-words.inc"
 %include "lib.inc"
 
 section .bss

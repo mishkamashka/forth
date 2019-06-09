@@ -1,247 +1,235 @@
-;section .bss
-;rs:             resq 65536
-;u_mem:          resq 65536
-;dict: 		resq 65536
-;word_buffer:    resb 1024
-;state:		resq 1	
-
-section .text
-
-; work with stack
-
-native "drop", drop
-    	pop rax
-    	xor rax, rax
-    	jmp next
-
-native "swap", swap
-    	pop rax
-    	pop rdx
-    	push rax
-    	push rdx
-    	jmp next
-
-native "dup", dup
-    	push qword [rsp]
-    	jmp next
-
-; ariphmetic operators
-
+;aritmetical operators 
 native "+", plus
-    	pop rdx
-    	pop rax
-    	add rax, rdx
-    	push rax
-    	jmp next
+	pop rax
+	add [rsp], rax
+	jmp next
 
-native "-", minus
-    	pop rdx
-    	pop rax
-    	sub rax, rdx
-    	push rax
-    	jmp next
-  
 native "*", mul
-    	pop rdx
-    	pop rax
-    	imul rdx
-    	push rax
-    	jmp next
+	pop rdx
+	pop rax
+	imul rdx
+	push rax
+	jmp next
 
 native "/", div
-  	 pop rcx
-  	 pop rax
-  	 cqo
-  	 idiv rcx
-  	 push rax
-   	 jmp next
+	pop rcx
+	pop rax
+	cqo
+	idiv rcx
+	push rax
+	jmp next
 
-native "%", mod
-    	pop rcx
-    	pop rax
-   	cqo
-    	idiv rcx
+native "%", div_rem
+	pop rcx
+	pop rax
+	cqo
+	idiv rcx
 	push rdx
-    	jmp next
+	jmp next
+
+native "-", sub
+	pop rax
+	sub [rsp], rax
+	jmp next
 
 native "=", equal
-  	pop rax
-	pop rcx
-	cmp rax, rcx
-   	jz .eq
-    	push 0
-   	jmp next
-.eq:
-    	push 1
-    	jmp next
+  pop rdx
+  pop rax
+  cmp rax, rdx
+  jne .nequals
+  xor rax, rax
+  mov rax, 1
+  push rax
+  jmp next
+.nequals:
+  xor rax, rax
+  push rax
+  jmp next
 
-native "<", ls
-    	pop rax
-    	pop rcx
-    	cmp rcx, rax
-    	jl .less
-    	push 0
-    	jmp next
-.less:
-    	push 1
-    	jmp next    
-    
-    
-; logic operators
-
-native "not", not
+native "<", less
+	pop rdx
 	pop rax
-    	test rax, rax
-    	setz al
-    	movzx rax, al
-    	push rax
-    	jmp next
+	cmp rax, rdx
+	jl .less
+	push 0
+	jmp next
+.less:
+	push 1
+	jmp next
 
-native "and", and
-    	pop rax
-    	and [rsp], rax
-    	jmp next
+native ">", greater
+	pop rdx
+	pop rax
+	cmp rax, rdx
+	jg .greater
+	push 0
+	jmp next
+.greater:
+	push 1
+	jmp next
+	
+;some comands to work with stack
+native 'drop', drop
+	add rsp, 8
+	jmp next
 
-native "or", or
-    	pop rax
-    	or [rsp], rax
-    	jmp next
+native 'swap', swap
+    pop rdx
+    pop rax
+    push rdx
+    push rax
+    jmp next
+	
+native 'dup', dup
+	push qword [rsp]
+	jmp next
+	
+;comands to work with returnment stack
+native ">r", to_r
+    pop rax
+    rpush rax
+    jmp next
+
+native "r>", from_r
+    rpop rax
+    push rax
+    jmp next
+
+native "r@", r_fetch
+    push qword [rstack]
+    jmp next
+	
+
+;logic operators 
+native 'not', not
+  pop rax
+  test rax, rax
+  jz .setone
+  xor rax, rax
+  push rax
+  jmp next
+  .setone:
+    xor rax, rax
+    mov rax, 1
+    push rax
+    jmp next
+
+native "and", bit_and
+	pop rax
+	pop rdx
+	and rdx, rax
+	push rax
+	jmp next
+
+native "or", bit_or
+	pop rax
+	pop rdx
+	or rax, rdx
+	push rax
+	jmp next
+	
+native 'lor', lor
+  pop rax
+  pop rdx
+  test rax, rax
+  jnz .yes
+  push rdx
+  jmp next
+  .yes:
+    push rax
+    jmp next
 
 native "land", land
-    	pop rax
-    	pop rcx
-    	test rax, rax
-    	jz .no
-    	push rcx
-    	jmp next
-.no:
-    	push rax
-    	jmp next
+	pop rax
+	pop rdx
+	test rax, rax
+	jz .false
+	test rdx, rdx
+	jz .false
+	push 1
+	jmp next
+.false:
+	push 0
+	jmp next
 
-native "lor", lor
-    	pop rax
-    	pop rcx
-    	test rax, rax
-    	jnz .yes
-    	push rcx
-    	jmp next
-.yes:
-    	push rax
-    	jmp next
+;words work with memory
+native "@", fetch
+    pop rax
+    push qword[rax]
+    jmp next
 
-; return stack
+native "!", save
+    pop rax
+    pop rdx
+    mov [rax], rdx
+    jmp next
 
-native ">r", to_return_stack
-    	pop rax
-	rpush rax
-    	jmp next
+native "c!", save_char
+    pop rax
+    pop rdx
+    mov [rax], dl
+    jmp next
 
-native "r>", from_return_stack
-    	rpop rax
-    	push rax
-    	jmp next
-
-native "r@", cp_from_rstack
-    	push qword [rstack]
-    	jmp next
-    
-; memory operators
-
-native "@", read
-    	pop rax
-    	push qword [rax]
-    	jmp next
-
-native "!", write
-    	pop rax
-    	pop rdx
-    	mov [rax], rdx
-    	jmp next
-
-native "c!", write_byte
-    	pop rax
-    	pop rdx
-    	mov [rax], dl
-    	jmp next
-
-native "c@", read_byte
-    	pop rax
-    	movzx rax, byte [rax]
-    	push rax
-    	jmp next
-
-native "execute", execute
-    	pop rax
-    	mov w, rax
-    	jmp [rax]
-
-native "foth-dp", forth_dp
+native "c@", fetch_char
+    pop rax
+    movzx rax, byte [rax]
+    push rax
+    jmp next
+	
+native "forth-dp", forth_dp
 	push dp
 	jmp next
-
-; execution management
-
+	
+native "execute", execute
+    pop rax
+    mov w, rax
+    jmp [rax]	
+	
+	
+;runtime need comands 
 native "docol", docol
-	rpush pc
-	add w, 8
-	mov pc, w
-        jmp next
-
+    rpush pc
+    add w, 8
+    mov pc, w
+    jmp next
+	
 native "branch", branch
-    	mov pc, [pc]
-    	jmp next
+    mov pc, [pc]
+    jmp next
 
 native "0branch", branch0
-    	pop rax
-    	test rax, rax
-    	jnz .skip
-    	mov pc, [pc]
-    	jmp next
-.skip:
-    	add pc, 8
-    	jmp next
+    pop rax
+    test rax, rax
+    jnz .skip
+    mov pc, [pc]
+    jmp next
+    .skip:
+    add pc, 8
+    jmp next
 
 native "exit", exit
-	rpop pc
-	jmp next
-
-; other
-
+    rpop pc
+    jmp next
+	
 native "lit", lit
-    	push qword [pc]
-    	add pc, 8
-    	jmp next
-    
+    push qword [pc]
+    add pc, 8
+    jmp next
+	
 native "sp", sp
-    	push rsp
-    	jmp next
-        
-native "bye", bye
-    	mov rax, 60
-    	xor rdi, rdi
-    	syscall
-
-native ".S", show
-    	mov rax, rsp
-.loop:
-    	cmp rax, [rsp_b]
-    	jz next
-    	mov rdi, [rax]
-    	push rax
-    	call print_int
-    	call print_newline
-    	pop rax
-    	add rax, 8
-    	jmp .loop
-
+    push rsp
+    jmp next
+	
 native "forth-stack-restore", forth_stack_restore
-	mov rsp, [stack_start]
-	jmp next
-
-native "foth-stack-base", forth_stack_base
+  mov rsp, [stack_start]
+  jmp next
+  
+native "forth-stack-base", forth_stack_base
 	push qword[stack_start]
 	jmp next
-
+	
+;( call_num a1 a2 a3 a4 a5 a6 -- new_rax new_rdx )
+;rdi, rsi, rdx, r10, r8, r9
 native "syscall", syscall
 	pop r9
 	pop r8
@@ -254,3 +242,7 @@ native "syscall", syscall
 	push rax
 	push rdx
 	jmp next
+	
+
+	
+	
