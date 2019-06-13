@@ -1,0 +1,1 @@
+cat src/third-step/stdlib.frt - | ./bin/forthress

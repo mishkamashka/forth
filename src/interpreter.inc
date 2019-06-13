@@ -61,7 +61,7 @@ colon "'", forth_tick, 1
 .eof:
       dq xt_drop, xt_exit
 
-;add info to word place in dictinory
+;add inft to word place in dictinory
 colon "forth-cfa", forth_cfa
           dq xt_lit, 9, xt_plus
           dq xt_dup, xt_string_length, xt_plus
